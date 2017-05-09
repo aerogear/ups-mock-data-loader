@@ -24,14 +24,14 @@ The executable script will be in `aerogear-mock-data-loader-1.0-SNAPSHOT/bin/moc
 Add your credentials and simply run the script:
 
 ```bash
-mock-data-loader.sh -u <username< -p <password> --apps <apps> --variants <variants> --tokens <tokens>
+mock-data-loader.sh -u <username> -p <password> --apps <apps> --variants <variants> --tokens <tokens>
 ```
 
 #### Creating Mock Data in RHMAP
 
 Only to create tokens is possible. You have to specify the variant credentials in otder to do this:
 ```bash
-mock-data-loader.sh -u <username< -p <password> --tokens <tokens> <variantId>:<secret>
+mock-data-loader.sh -u <username> -p <password> --tokens <tokens> <variantId>:<secret>
 ```
 
 ## More Options
