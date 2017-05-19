@@ -53,6 +53,7 @@ public class MockDataLoaderBuilder {
         private int tokenCount;
         private String tokenAlias;
         private String csvFile;
+        private boolean csvAppend;
 
         private final AerogearAdminServiceProvider provider;
 
@@ -72,14 +73,15 @@ public class MockDataLoaderBuilder {
             return this;
         }
 
-        public MockTokenLoaderBuilder withCsvFile(String path) {
+        public MockTokenLoaderBuilder withCsvFile(String path, boolean append) {
             this.csvFile = path;
+            this.csvAppend = append;
             return this;
         }
 
         public Runnable build() {
             //LoggerThread lt = new LoggerThread(LoggerFactory.getLogger(MockTokenLoader.class), 0, 0, tokenCount);
-            MockTokenLoader res = new MockTokenLoader(provider, variantID, variantSecret, tokenCount, tokenAlias, csvFile);
+            MockTokenLoader res = new MockTokenLoader(provider, variantID, variantSecret, tokenCount, tokenAlias, csvFile, csvAppend);
 
             res.addObserver(new ConsoleObserver(LoggerFactory.getLogger(MockTokenLoader.class), 0, 0, tokenCount));
             return res;
@@ -93,6 +95,7 @@ public class MockDataLoaderBuilder {
         private int tokenCount;
         private String tokenAlias;
         private String csvPath;
+        private boolean csvAppend;
 
         private final AerogearAdminServiceProvider provider;
 
@@ -113,15 +116,16 @@ public class MockDataLoaderBuilder {
             return this;
         }
 
-        public MockVariantLoaderBuilder withCSVLog(final String csvPath) {
+        public MockVariantLoaderBuilder withCSVLog(final String csvPath, final boolean append) {
             this.csvPath = csvPath;
+            this.csvAppend = append;
             return this;
         }
 
         public Runnable build() {
             MockVariantLoader mockVariantLoader = new MockVariantLoader(provider, appId, appName, variantCount);
             if (tokenCount != 0) {
-                MockTokenLoader mtl = new MockTokenLoader(provider, null, null, tokenCount, this.tokenAlias, this.csvPath);
+                MockTokenLoader mtl = new MockTokenLoader(provider, null, null, tokenCount, this.tokenAlias, this.csvPath, this.csvAppend);
                 mockVariantLoader.addObserver(mtl);
             }
 
@@ -136,6 +140,7 @@ public class MockDataLoaderBuilder {
         private int tokenCount;
         private String tokenAlias;
         private String csvPath;
+        private boolean csvAppend;
         private int variantCount;
 
         private MockAppLoaderBuilder(AerogearAdminServiceProvider provider, final int appCount) {
@@ -149,8 +154,9 @@ public class MockDataLoaderBuilder {
             return this;
         }
 
-        public MockAppLoaderBuilder withCSVLog(final String csvPath) {
+        public MockAppLoaderBuilder withCSVLog(final String csvPath, final boolean append) {
             this.csvPath = csvPath;
+            this.csvAppend = append;
             return this;
         }
 
@@ -170,7 +176,7 @@ public class MockDataLoaderBuilder {
                 mockVariantLoader.addObserver(observer);
 
                 if (tokenCount > 0) {
-                    MockTokenLoader mtl = new MockTokenLoader(provider, null, null, tokenCount, this.tokenAlias, this.csvPath);
+                    MockTokenLoader mtl = new MockTokenLoader(provider, null, null, tokenCount, this.tokenAlias, this.csvPath, this.csvAppend);
                     mockVariantLoader.addObserver(mtl);
                     mtl.addObserver(observer);
                 }
@@ -199,7 +205,7 @@ public class MockDataLoaderBuilder {
                         ICliUtils.getIntOptionValue(cli, ICliUtils.OPTION_APPS))
                     .withVariants(ICliUtils.getIntOptionValue(cli, ICliUtils.OPTION_VARIANTS, 0))
                     .withTokens(ICliUtils.getIntOptionValue(cli, ICliUtils.OPTION_TOKENS, 0), cli.getOptionValue(ICliUtils.OPTION_ALIAS))
-                    .withCSVLog(cli.getOptionValue(ICliUtils.OPTION_CSV))
+                    .withCSVLog(cli.getOptionValue(ICliUtils.OPTION_CSV), cli.hasOption(ICliUtils.OPTION_APPEND))
                     .build();
             } else {
                 // Only tokens must be generated
@@ -211,11 +217,10 @@ public class MockDataLoaderBuilder {
                     .forMockTokenLoader(
                         cli.getOptionValue(ICliUtils.OPTION_URL, ICliUtils.DEFAULT_URL))
                     .with(idAndSecret[0], idAndSecret[1], tokenCount)
-                    .withCsvFile(cli.getOptionValue(ICliUtils.OPTION_CSV))
+                    .withCsvFile(cli.getOptionValue(ICliUtils.OPTION_CSV), cli.hasOption(ICliUtils.OPTION_APPEND))
                     .withTokenAlias(cli.getOptionValue(ICliUtils.OPTION_ALIAS))
                     .build();
             }
-
         }
     }
 }
