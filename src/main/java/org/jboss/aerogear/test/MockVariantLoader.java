@@ -51,6 +51,8 @@ public class MockVariantLoader extends Observable implements Observer, Runnable 
      * @param appId ID of the app owning the variants.
      */
     private void generateVariants(final String appId) {
+
+        this.provider.setCacheAnswer(false);
         for (int variantNumber = 0; variantNumber < variantCount; variantNumber++) {
             setChanged();
             String variantID = UUID.randomUUID().toString();

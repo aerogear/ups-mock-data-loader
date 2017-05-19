@@ -9,7 +9,7 @@ import java.io.PrintWriter;
  * This object takes care of creating a CSV file with a number of columns.
  */
 public class CSV {
-    final PrintWriter pw;
+    private final PrintWriter pw;
 
     private CSV() {
         this.pw = null;
@@ -25,10 +25,13 @@ public class CSV {
      * @param columns List of columns header. A comment at the beginning of the CSV will be inserted with the list of columns
      * @throws IOException on any IO error
      */
-    public CSV(final String outputPath, final String... columns) throws IOException {
-        pw = new PrintWriter(new FileOutputStream(outputPath), true);
-        String header = String.join(",", columns);
-        pw.println("#" + header);
+    public CSV(final String outputPath, final boolean append, final String... columns) throws IOException {
+        pw = new PrintWriter(new FileOutputStream(outputPath, append), true);
+
+        if (!append) {
+            String header = String.join(",", columns);
+            pw.println("#" + header);
+        }
     }
 
     /**

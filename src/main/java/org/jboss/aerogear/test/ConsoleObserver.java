@@ -19,6 +19,8 @@ public class ConsoleObserver implements Observer {
     private int currentToken = 0;
     private int failedToken = 0;
 
+    private long startTime = System.currentTimeMillis();
+
     private final Logger LOG;
 
     public ConsoleObserver(Logger logger, final int totalApps, final int totalVariants, final int totalTokens) {
@@ -67,6 +69,7 @@ public class ConsoleObserver implements Observer {
         } else {
             currentAppProgress++;
         }
+
         printUpdate();
         System.out.println();
         reset();
@@ -78,16 +81,17 @@ public class ConsoleObserver implements Observer {
     private synchronized void reset() {
         printUpdate();
         currentToken = currentVariant = failedToken = failedVariants = 0;
+        startTime = System.currentTimeMillis();
     }
 
     /**
      * Print a progress update
      */
     private synchronized void printUpdate() {
-        System.out.printf("\rApps created/failed/total: %3d/%3d/%3d - Variants created/failed/total: %3d/%3d/%3d - Tokens created/failed/total: %5d/%5d/%5d",
+        System.out.printf("\rApps created/failed/total: %3d/%3d/%3d - Variants created/failed/total: %3d/%3d/%3d - Tokens created/failed/total: %5d/%5d/%5d - Elapsed: %d secs",
             currentAppProgress, currentAppFailed, totalApps,
             currentVariant, failedVariants, totalVariants,
-            currentToken, failedToken, totalTokens * totalVariants);
+            currentToken, failedToken, totalTokens * totalVariants, (System.currentTimeMillis() - startTime)/1000);
     }
 
     @Override

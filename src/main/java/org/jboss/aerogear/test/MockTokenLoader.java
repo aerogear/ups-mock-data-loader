@@ -27,13 +27,13 @@ public class MockTokenLoader extends Observable implements Observer, Runnable {
      * @param tokenAlias alias to be used for the created tokens
      * @param csvFilePath path to a csv file to be created containing the token data (variantid, token alias and token id)
      */
-    MockTokenLoader(final AerogearAdminServiceProvider provider, final String variantID, final String variantSecret, final int tokenCount, final String tokenAlias, final String csvFilePath)  {
+    MockTokenLoader(final AerogearAdminServiceProvider provider, final String variantID, final String variantSecret, final int tokenCount, final String tokenAlias, final String csvFilePath, boolean append)  {
         try {
             this.variantID = variantID;
             this.variantSecret = variantSecret;
             this.tokenCount = tokenCount;
             this.tokenAlias = tokenAlias;
-            this.csvFile = csvFilePath == null ? CSV.NOOP.INSTANCE : new CSV(csvFilePath, "VARIANT ID", "TOKEN ALIAS", "TOKEN ID");
+            this.csvFile = csvFilePath == null ? CSV.NOOP.INSTANCE : new CSV(csvFilePath, append, "VARIANT ID", "TOKEN ALIAS", "TOKEN ID");
             this.provider = provider;
         } catch (Exception e) {
             throw new RuntimeException(e);

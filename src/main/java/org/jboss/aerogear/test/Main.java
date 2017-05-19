@@ -49,6 +49,7 @@ public class Main implements ICliUtils {
         options.addOption(Option.builder("U").longOpt(OPTION_URL).hasArg(true).argName("UPS URL").desc("URL to the UPS server. Defaults to <" + DEFAULT_URL + ">").required(false).build());
         options.addOption(Option.builder("C").longOpt(OPTION_CSV).hasArg(true).argName("CSV FILE").desc("Generates a CSV file containing: variantid, token alias and tokenid").required(false).build());
         options.addOption(Option.builder("A").longOpt(OPTION_ALIAS).hasArg(true).argName("alias").desc("Use this option if you want a single alias for all the tokens").required(false).build());
+        options.addOption(Option.builder("X").longOpt(OPTION_APPEND).desc("Use this option if you want to append the list of created tokens to the given CSV file").required(false).build());
 
         CommandLineParser parser = new DefaultParser();
 
@@ -71,14 +72,15 @@ public class Main implements ICliUtils {
 
             final String syntax = "mock-data-loader.sh " +
                 "-u|--username <username>" +
-                "-u|--password <password>" +
+                "-p|--password <password>" +
                 "-a|--apps <TOTAL> " +
                 "-t|--tokens <TOTAL> [variantid:secret] " +
                 "-A|--tokenAlias <alias>" +
                 "-v|--variants <TOTAL> " +
                 "[-c|--clientid <CLIENTID> " +
-                " -U|--url <UPS URL>]" +
-                "-C|--csv <path>";
+                " -U|--url <UPS URL>] " +
+                "-C|--csv <path> " +
+                "-X|--append";
 
 
             new HelpFormatter().printHelp(syntax, options);
