@@ -17,6 +17,13 @@ target
 
 # Generated files
 devices.csv
+# IDEA and Eclipse
+.idea/
+*.class
+*.iml
+.classpath
+.project
+.settings/
 
 # Logs
 *.log.zip
