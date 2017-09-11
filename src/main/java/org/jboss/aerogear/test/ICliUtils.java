@@ -10,12 +10,14 @@ public interface ICliUtils {
     String OPTION_PASSWORD = "password";
     String OPTION_CLIENTID = "clientid";
     String OPTION_URL = "url";
+    String OPTION_KEYCLOAK = "keycloak";
     String OPTION_CSV = "csv";
     String OPTION_APPEND = "append";
     String OPTION_ALIAS = "alias";
 
     String DEFAULT_CLIENT_ID = "unified-push-server-js";
     String DEFAULT_URL = "http://localhost:8080";
+    String DEFAULT_KEYCLOAK = "http://localhost:8080";
 
     public static int getIntOptionValue(final CommandLine cmd, final String optionName) {
         return getIntOptionValue(cmd, optionName, null);

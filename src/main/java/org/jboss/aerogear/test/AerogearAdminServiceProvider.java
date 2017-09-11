@@ -8,6 +8,7 @@ import at.ftec.aerogear.model.PushServer;
  */
 public class AerogearAdminServiceProvider {
     private final String url;
+    private final String keycloakURL;
     private final String clientid;
     private final String username;
     private final String password;
@@ -16,8 +17,9 @@ public class AerogearAdminServiceProvider {
 
     private DefaultAerogearAdminService cachedInstance = null;
 
-    public AerogearAdminServiceProvider(final String url) {
+    public AerogearAdminServiceProvider(final String url, final String keycloakURL) {
         this.url = url;
+        this.keycloakURL = keycloakURL;
         this.clientid = null;
         this.username = null;
         this.password = null;
@@ -26,12 +28,14 @@ public class AerogearAdminServiceProvider {
     /**
      * Builds a new provider
      * @param url URL to the aerogear UPS server
+     * @param url URL to the keycloak server
      * @param clientid clientid to be used to authenticate
      * @param username ups username
      * @param password ups password
      */
-    public AerogearAdminServiceProvider(final String url, final String clientid, final String username, final String password) {
+    public AerogearAdminServiceProvider(final String url, final String keycloakURL, final String clientid, final String username, final String password) {
         this.url = url;
+        this.keycloakURL = keycloakURL;
         this.clientid = clientid;
         this.username = username;
         this.password = password;
@@ -56,7 +60,7 @@ public class AerogearAdminServiceProvider {
         if (cacheAnswer && cachedInstance != null) {
             return cachedInstance;
         }
-        PushServer pushServer = new PushServer(url);
+        PushServer pushServer = new PushServer(url, keycloakURL);
 
         if (username != null) {
             pushServer.setKeycloakCredentials(username, password, clientid);

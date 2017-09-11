@@ -47,6 +47,7 @@ public class Main implements ICliUtils {
         options.addOption(Option.builder("p").longOpt(OPTION_PASSWORD).hasArg(true).argName("password").desc("Password to be used to authenticate to the UPS").required(false).build());
         options.addOption(Option.builder("c").longOpt(OPTION_CLIENTID).hasArg(true).argName("id").desc("Client id used to create the apps. Defaults to <" + DEFAULT_CLIENT_ID + ">").required(false).build());
         options.addOption(Option.builder("U").longOpt(OPTION_URL).hasArg(true).argName("UPS URL").desc("URL to the UPS server. Defaults to <" + DEFAULT_URL + ">").required(false).build());
+        options.addOption(Option.builder("K").longOpt(OPTION_KEYCLOAK).hasArg(true).argName("Keycloak URL").desc("URL to the Keycloak server. Defaults to <" + DEFAULT_KEYCLOAK + ">").required(false).build());
         options.addOption(Option.builder("C").longOpt(OPTION_CSV).hasArg(true).argName("CSV FILE").desc("Generates a CSV file containing: variantid, token alias and tokenid").required(false).build());
         options.addOption(Option.builder("A").longOpt(OPTION_ALIAS).hasArg(true).argName("alias").desc("Use this option if you want a single alias for all the tokens").required(false).build());
         options.addOption(Option.builder("X").longOpt(OPTION_APPEND).desc("Use this option if you want to append the list of created tokens to the given CSV file").required(false).build());
@@ -78,7 +79,8 @@ public class Main implements ICliUtils {
                 "-A|--tokenAlias <alias>" +
                 "-v|--variants <TOTAL> " +
                 "[-c|--clientid <CLIENTID> " +
-                " -U|--url <UPS URL>] " +
+                "-U|--url <UPS URL>] " +
+                "-K|--keycloak <Keycloak URL>] " +
                 "-C|--csv <path> " +
                 "-X|--append";
 

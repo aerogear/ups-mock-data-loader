@@ -26,8 +26,6 @@ public abstract class VariantBuilder<T extends VariantBuilder, U extends Variant
         switch (variantType) {
             case ADM: return (T) new AdmVariantBuilder();
             case WINDOWS_WNS: return (T) new WindowsWNSVariantBuilder();
-            case WINDOWS_MPNS: return (T) new WindowsMPNSVariantBuilder();
-            case SIMPLE_PUSH: return (T) new SimplePushVariantBuilder();
             case IOS: return (T) new IOSVariantBuilder();
             case ANDROID: return (T) new AndroidVariantBuilder();
         }
