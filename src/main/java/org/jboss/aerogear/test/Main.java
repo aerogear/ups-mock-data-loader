@@ -71,14 +71,14 @@ public class Main implements ICliUtils {
             System.out.println();
 
             final String syntax = "mock-data-loader.sh " +
-                "-u|--username <username>" +
-                "-p|--password <password>" +
+                "-u|--username <username> " +
+                "-p|--password <password> " +
                 "-a|--apps <TOTAL> " +
                 "-t|--tokens <TOTAL> [variantid:secret] " +
-                "-A|--tokenAlias <alias>" +
+                "-A|--tokenAlias <alias> " +
                 "-v|--variants <TOTAL> " +
                 "[-c|--clientid <CLIENTID> " +
-                " -U|--url <UPS URL>] " +
+                "-U|--url <UPS URL>] " +
                 "-C|--csv <path> " +
                 "-X|--append";
 

@@ -1,6 +1,6 @@
 # Mocked data loader
 
-This tools can be used to populate an UPS server with mock applications, variants and tokens
+This tool can be used to populate a UPS server with mock applications, variants and tokens.
 
 ## Build the software
 
@@ -12,7 +12,7 @@ mvn clean install
 
 ## Load the mock data
 
-uncompress the produced archive in a directory of your choice:
+Uncompress the produced archive in a directory of your choice:
 
 ```bash
 tar xvfz target/aerogear-mock-data-loader-1.0.0-SNAPSHOT-bin.zip
@@ -29,21 +29,22 @@ mock-data-loader.sh -u <username> -p <password> --apps <apps> --variants <varian
 
 #### Creating Mock Data in RHMAP
 
-Only to create tokens is possible. You have to specify the variant credentials in otder to do this:
+Only creating tokens is possible. You have to specify the variant credentials in order to do this:
 ```bash
 mock-data-loader.sh -u <username> -p <password> --tokens <tokens> <variantId>:<secret>
 ```
 
 ## More Options
 
-Running the script without arguments will show an help screen:
+Running the script without arguments will show the following help screen:
 
 ```bash
-usage: mock-data-loader.sh -u|--username <username>-u|--password
-                           <password>-a|--apps <TOTAL> -t|--tokens <TOTAL>
+usage: mock-data-loader.sh -u|--username <username> -p|--password
+                           <password> -a|--apps <TOTAL> -t|--tokens <TOTAL>
                            [variantid:secret] -A|--tokenAlias
-                           <alias>-v|--variants <TOTAL> [-c|--clientid
-                           <CLIENTID>  -U|--url <UPS URL>]-C|--csv <path>
+                           <alias> -v|--variants <TOTAL> [-c|--clientid
+                           <CLIENTID> -U|--url <UPS URL>] -C|--csv <path> 
+                           -X|--append
  -a,--apps <total>                        Number of apps to be generated
  -A,--alias <alias>                       Use this option if you want a
                                           single alias for all the tokens
@@ -62,5 +63,8 @@ usage: mock-data-loader.sh -u|--username <username>-u|--password
                                           to <http://localhost:8080>
  -v,--variants <total>                    Number of variants to be
                                           generated
+ -X,--append                              Use this option if you want to
+                                          append the list of created
+                                          tokens to the given CSV file
 
 ```
