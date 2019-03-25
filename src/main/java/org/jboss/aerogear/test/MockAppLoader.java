@@ -1,6 +1,5 @@
 package org.jboss.aerogear.test;
 
-import at.ftec.aerogear.exception.AerogearHelperException;
 import org.jboss.aerogear.test.builders.PushApplicationBuilder;
 import org.jboss.aerogear.unifiedpush.api.PushApplication;
 
@@ -57,7 +56,7 @@ public class MockAppLoader extends Observable implements Runnable {
 
                 // App created: notify the observers and pass the newly created app§
                 notifyObservers(app);
-            } catch (AerogearHelperException re) {
+            } catch (Exception re) {
 
                 // Creation failed: notify the observers and pass the exception
                 notifyObservers(re);

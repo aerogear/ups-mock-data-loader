@@ -88,7 +88,7 @@ public class MockTokenLoader extends Observable implements Observer, Runnable {
                 installation.setDeviceToken(generateAndroidToken());
                 installation.setAlias(DEVICE_ALIAS);
 
-                installation = provider.getAdminService().registerDevice(installation, variantID, variantSecret);
+                installation = provider.getAdminService(variantID, variantSecret).registerDevice(installation);
 
                 notifyObservers(installation);
                 csvFile.addLine(variantID, installation.getAlias(), installation.getId());

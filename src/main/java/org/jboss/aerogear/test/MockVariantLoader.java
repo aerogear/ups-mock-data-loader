@@ -1,8 +1,8 @@
 package org.jboss.aerogear.test;
 
-import at.ftec.aerogear.api.impl.DefaultAerogearAdminService;
 import org.jboss.aerogear.test.builders.AndroidVariantBuilder;
 import org.jboss.aerogear.test.builders.VariantBuilder;
+import org.jboss.aerogear.test.retrofit.UnifiedPushService;
 import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.jboss.aerogear.unifiedpush.api.Variant;
 import org.jboss.aerogear.unifiedpush.api.VariantType;
@@ -70,9 +70,9 @@ public class MockVariantLoader extends Observable implements Observer, Runnable 
                 .build();
 
             try {
-                DefaultAerogearAdminService aerogearAdminService = provider.getAdminService();
-                v = aerogearAdminService.createVariant(v, appId);
+                UnifiedPushService aerogearAdminService = provider.getAdminService();
                 notifyObservers(v);
+                v = aerogearAdminService.createVariant(v, appId);
             } catch (Exception e) {
                 notifyObservers(e);
             }
