@@ -1,5 +1,6 @@
 package org.jboss.aerogear.test.retrofit;
 
+import org.jboss.aerogear.unifiedpush.api.AndroidVariant;
 import org.jboss.aerogear.unifiedpush.api.Installation;
 import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.jboss.aerogear.unifiedpush.api.Variant;
@@ -37,7 +38,7 @@ public interface UnifiedPushService {
     Call<Installation> registerDevice(@Body Installation installation);
 
     @POST(PLATFORM_APPLICATION_ENDPOINT)
-    Call<Variant> createVariant(@Body Variant v, @Path("appId") String appId, @Path("platformName") String platformName);
+    Call<AndroidVariant> createVariant(@Body AndroidVariant v, @Path("appId") String appId, @Path("platformName") String platformName);
 
 
 

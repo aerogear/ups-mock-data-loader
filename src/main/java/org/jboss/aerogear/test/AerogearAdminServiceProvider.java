@@ -2,6 +2,7 @@ package org.jboss.aerogear.test;
 
 import com.google.gson.*;
 import okhttp3.Credentials;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -16,6 +17,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,6 +28,24 @@ import java.util.logging.Logger;
 public class AerogearAdminServiceProvider {
 
     private static final Gson gson;
+
+    private static //Kill ssl trust
+    final TrustManager[] TRUST_ALL_CERTS = new TrustManager[]{
+            new X509TrustManager() {
+                @Override
+                public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                }
+
+                @Override
+                public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                }
+
+                @Override
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return new java.security.cert.X509Certificate[]{};
+                }
+            }
+    };
 
     static {
         gson = new GsonBuilder()
@@ -113,49 +134,9 @@ public class AerogearAdminServiceProvider {
             return cachedInstance;
         }
 
-        final TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
-                    @Override
-                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-                    }
 
-                    @Override
-                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-                    }
-
-                    @Override
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return new java.security.cert.X509Certificate[]{};
-                    }
-                }
-        };
-
-        // Install the all-trusting trust manager
-        final SSLContext sslContext;
         try {
-            sslContext = SSLContext.getInstance("SSL");
-
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-
-            // Create an ssl socket factory with our all-trusting manager
-            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            // set your desired log level
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-
-            OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
-            okHttpClientBuilder.sslSocketFactory(sslSocketFactory, (X509TrustManager)trustAllCerts[0]).hostnameVerifier((hostname, session) -> true);
-
-            okHttpClientBuilder
-                    .addInterceptor(chain -> {
-                        Request request = chain.request();
-                        Request.Builder newRequest = request.newBuilder().header("Authorization", "Bearer " + token);
-                        return chain.proceed(newRequest.build());
-                    })
-                    .addInterceptor(logging);
-
+            OkHttpClient.Builder okHttpClientBuilder = defaultOkHttpClientBuilder(()->"Bearer " + token);
 
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(url)
@@ -163,10 +144,9 @@ public class AerogearAdminServiceProvider {
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
 
-
             cachedInstance = retrofit.create(UnifiedPushService.class);
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         return cachedInstance;
     }
@@ -176,27 +156,59 @@ public class AerogearAdminServiceProvider {
     }
 
     public UnifiedPushService getAdminService(String variantID, String variantSecret) {
+        try {
+            OkHttpClient.Builder okHttpClientBuilder = defaultOkHttpClientBuilder((()->Credentials.basic(variantID, variantSecret)));
+
+
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(url)
+                    .client(okHttpClientBuilder.build())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
+                    .build();
+
+            return retrofit.create(UnifiedPushService.class);
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Interceptor auth(Supplier<String> headerSupplier) {
+
+        return (chain) -> {
+            System.out.println(headerSupplier.get());
+            Request request = chain.request();
+            Request.Builder newRequest = request.newBuilder().header("Authorization", headerSupplier.get());
+            return chain.proceed(newRequest.build());
+        };
+    }
+
+    private OkHttpClient.Builder defaultOkHttpClientBuilder(Supplier<String> authorizationHeaderSupplier ) throws NoSuchAlgorithmException, KeyManagementException {
+
+
+        // Create an ssl socket factory with our all-trusting manager
+        SSLSocketFactory sslSocketFactory = insecureSocketFactory();
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         // set your desired log level
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
-        okHttpClientBuilder
-                .addInterceptor(chain -> {
-                    Request request = chain.request();
-                    Request.Builder newRequest = request.newBuilder().header("Authorization", Credentials.basic(variantID, variantSecret));
-                    return chain.proceed(newRequest.build());
-                })
-                .addInterceptor(logging);
+        okHttpClientBuilder.addInterceptor(logging);
+        okHttpClientBuilder.addInterceptor(auth(authorizationHeaderSupplier));
+        okHttpClientBuilder.sslSocketFactory(sslSocketFactory, (X509TrustManager) TRUST_ALL_CERTS[0]).hostnameVerifier((hostname, session) -> true);
 
+        return okHttpClientBuilder;
+    }
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(url)
-                .client(okHttpClientBuilder.build())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
+    private SSLSocketFactory insecureSocketFactory() throws NoSuchAlgorithmException, KeyManagementException {
 
-        return retrofit.create(UnifiedPushService.class);
+        // Install the all-trusting trust manager
+        final SSLContext sslContext;
+
+        sslContext = SSLContext.getInstance("SSL");
+
+        sslContext.init(null, TRUST_ALL_CERTS, new java.security.SecureRandom());
+
+        return sslContext.getSocketFactory();
     }
 }

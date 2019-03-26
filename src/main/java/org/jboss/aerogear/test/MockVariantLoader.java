@@ -3,6 +3,7 @@ package org.jboss.aerogear.test;
 import org.jboss.aerogear.test.builders.AndroidVariantBuilder;
 import org.jboss.aerogear.test.builders.VariantBuilder;
 import org.jboss.aerogear.test.retrofit.UnifiedPushService;
+import org.jboss.aerogear.unifiedpush.api.AndroidVariant;
 import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.jboss.aerogear.unifiedpush.api.Variant;
 import org.jboss.aerogear.unifiedpush.api.VariantType;
@@ -62,7 +63,7 @@ public class MockVariantLoader extends Observable implements Observer, Runnable 
             String variantID = UUID.randomUUID().toString();
             String variantSecret = UUID.randomUUID().toString();
 
-            Variant v = VariantBuilder.<AndroidVariantBuilder>forVariant(VariantType.ANDROID)
+            AndroidVariant v = VariantBuilder.<AndroidVariantBuilder>forVariant(VariantType.ANDROID)
                     .withVariantId(variantID)
                     .withDescription(String.format(VARIANT_DESC_PATTERN, variantNumber, appName))
                     .withDeveloper(VARIANT_DEVELOPER)
@@ -75,8 +76,8 @@ public class MockVariantLoader extends Observable implements Observer, Runnable 
 
             try {
                 UnifiedPushService aerogearAdminService = provider.getAdminService();
-                notifyObservers(v);
                 v = aerogearAdminService.createVariant(v, appId, VariantType.ANDROID.getTypeName()).execute().body();
+                notifyObservers(v);
             } catch (Exception e) {
                 Logger.getAnonymousLogger().log(Level.SEVERE, e.getMessage(), e);
                 notifyObservers(e);
