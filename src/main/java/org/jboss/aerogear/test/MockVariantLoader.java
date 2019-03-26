@@ -10,6 +10,8 @@ import org.jboss.aerogear.unifiedpush.api.VariantType;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Loader for mock variant objects
@@ -27,9 +29,10 @@ public class MockVariantLoader extends Observable implements Observer, Runnable 
 
     /**
      * Initializes the object
-     * @param provider provider to be used to authenticate to UPS
-     * @param appId id of the application owning these variants
-     * @param appName name of the application owning these variants
+     *
+     * @param provider     provider to be used to authenticate to UPS
+     * @param appId        id of the application owning these variants
+     * @param appName      name of the application owning these variants
      * @param variantCount number of variants to be created
      */
     MockVariantLoader(AerogearAdminServiceProvider provider, final String appId, final String appName, final int variantCount) {
@@ -48,6 +51,7 @@ public class MockVariantLoader extends Observable implements Observer, Runnable 
 
     /**
      * Generates the variants
+     *
      * @param appId ID of the app owning the variants.
      */
     private void generateVariants(final String appId) {
@@ -59,21 +63,22 @@ public class MockVariantLoader extends Observable implements Observer, Runnable 
             String variantSecret = UUID.randomUUID().toString();
 
             Variant v = VariantBuilder.<AndroidVariantBuilder>forVariant(VariantType.ANDROID)
-                .withVariantId(variantID)
-                .withDescription(String.format(VARIANT_DESC_PATTERN, variantNumber, appName))
-                .withDeveloper(VARIANT_DEVELOPER)
-                .withId(variantID)
-                .withName(String.format(VARIANT_NAME_PATTERN, appName, variantNumber))
-                .withSecret(variantSecret)
-                .withGoogleKey("googlekey")
-                .withProjectNumber("123456")
-                .build();
+                    .withVariantId(variantID)
+                    .withDescription(String.format(VARIANT_DESC_PATTERN, variantNumber, appName))
+                    .withDeveloper(VARIANT_DEVELOPER)
+                    .withId(variantID)
+                    .withName(String.format(VARIANT_NAME_PATTERN, appName, variantNumber))
+                    .withSecret(variantSecret)
+                    .withGoogleKey("googlekey")
+                    .withProjectNumber("123456")
+                    .build();
 
             try {
                 UnifiedPushService aerogearAdminService = provider.getAdminService();
                 notifyObservers(v);
-                v = aerogearAdminService.createVariant(v, appId);
+                v = aerogearAdminService.createVariant(v, appId, VariantType.ANDROID.getTypeName()).execute().body();
             } catch (Exception e) {
+                Logger.getAnonymousLogger().log(Level.SEVERE, e.getMessage(), e);
                 notifyObservers(e);
             }
         }

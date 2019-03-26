@@ -3,6 +3,7 @@ package org.jboss.aerogear.test.retrofit;
 import org.jboss.aerogear.unifiedpush.api.Installation;
 import org.jboss.aerogear.unifiedpush.api.PushApplication;
 import org.jboss.aerogear.unifiedpush.api.Variant;
+import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -30,13 +31,13 @@ public interface UnifiedPushService {
 
 
     @POST(APPLICATION_ENDPOINT)
-    PushApplication createPushApplication(@Body PushApplication app);
+    Call<PushApplication> createPushApplication(@Body PushApplication app);
 
     @POST(DEVICE_ENDPOINT)
-    Installation registerDevice(@Body Installation installation);
+    Call<Installation> registerDevice(@Body Installation installation);
 
     @POST(PLATFORM_APPLICATION_ENDPOINT)
-    Variant createVariant(@Body Variant v, @Path("appId") String appId, @Path("platformName") String platformName);
+    Call<Variant> createVariant(@Body Variant v, @Path("appId") String appId, @Path("platformName") String platformName);
 
 
 

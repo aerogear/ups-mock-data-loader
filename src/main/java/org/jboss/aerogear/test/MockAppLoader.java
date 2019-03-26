@@ -5,6 +5,8 @@ import org.jboss.aerogear.unifiedpush.api.PushApplication;
 
 import java.util.Observable;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Loader for MOCK apps.
@@ -52,12 +54,12 @@ public class MockAppLoader extends Observable implements Runnable {
                         .withMasterSecret(MASTER_SECRET)
                         .withPushApplicationID(appId);
 
-                PushApplication app = provider.getAdminService().createPushApplication(builder.build());
+                PushApplication app = provider.getAdminService().createPushApplication(builder.build()).execute().body();
 
                 // App created: notify the observers and pass the newly created app§
                 notifyObservers(app);
             } catch (Exception re) {
-
+                Logger.getAnonymousLogger().log(Level.SEVERE, re.getMessage(), re);
                 // Creation failed: notify the observers and pass the exception
                 notifyObservers(re);
             }

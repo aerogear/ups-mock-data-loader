@@ -12,34 +12,31 @@ public class MockDataLoaderBuilder {
     /**
      * Creates a new builder for {@link MockTokenLoader} objects.
      * @param url URL to the UPS server
+     * @param token OAuth token to access ups (from oc whoami -t)
      * @return the builder instance
      */
-    public static MockTokenLoaderBuilder forMockTokenLoader(final String url) {
-        return new MockTokenLoaderBuilder(new AerogearAdminServiceProvider(url));
+    public static MockTokenLoaderBuilder forMockTokenLoader(final String url, final String token) {
+        return new MockTokenLoaderBuilder(new AerogearAdminServiceProvider(url, token));
     }
 
     /**
      * Creates a new builder for {@link MockVariantLoader} objects.
      * @param url URL to the UPS server
-     * @param username username for the UPS server
-     * @param password password for the UPS server
-     * @param clientId clientId for the UPS server
+     * @param token OAuth token to access ups (from oc whoami -t)
      * @return the builder instance
      */
-    public static MockVariantLoaderBuilder forMockVariantLoader(final String url, final String username, final String password, final String clientId) {
-        return new MockVariantLoaderBuilder(new AerogearAdminServiceProvider(url, clientId, username, password));
+    public static MockVariantLoaderBuilder forMockVariantLoader(final String url, final String token) {
+        return new MockVariantLoaderBuilder(new AerogearAdminServiceProvider(url, token));
     }
 
     /**
      * Creates a new builder for {@link MockAppLoader} objects.
      * @param url URL to the UPS server
-     * @param username username for the UPS server
-     * @param password password for the UPS server
-     * @param clientId clientId for the UPS server
+     * @param token OAuth token to access ups (from oc whoami -t)
      * @return the builder instance
      */
-    public static MockAppLoaderBuilder forMockAppLoader(final String url, final String username, final String password, final String clientId, int appCount) {
-        return new MockAppLoaderBuilder(new AerogearAdminServiceProvider(url, clientId, username, password), appCount);
+    public static MockAppLoaderBuilder forMockAppLoader(final String url, final String token, int appCount) {
+        return new MockAppLoaderBuilder(new AerogearAdminServiceProvider(url, token), appCount);
     }
 
     public static MockLoaderBuilder forCli(final CommandLine cli) {
@@ -199,9 +196,7 @@ public class MockDataLoaderBuilder {
                 return MockDataLoaderBuilder.
                     forMockAppLoader(
                         cli.getOptionValue(ICliUtils.OPTION_URL, ICliUtils.DEFAULT_URL),
-                        cli.getOptionValue(ICliUtils.OPTION_USERNAME),
-                        cli.getOptionValue(ICliUtils.OPTION_PASSWORD),
-                        cli.getOptionValue(ICliUtils.OPTION_CLIENTID, ICliUtils.DEFAULT_CLIENT_ID),
+                        cli.getOptionValue(ICliUtils.OPTION_AUTHZ_TOKEN),
                         ICliUtils.getIntOptionValue(cli, ICliUtils.OPTION_APPS))
                     .withVariants(ICliUtils.getIntOptionValue(cli, ICliUtils.OPTION_VARIANTS, 0))
                     .withTokens(ICliUtils.getIntOptionValue(cli, ICliUtils.OPTION_TOKENS, 0), cli.getOptionValue(ICliUtils.OPTION_ALIAS))
@@ -215,7 +210,8 @@ public class MockDataLoaderBuilder {
 
                 return MockDataLoaderBuilder
                     .forMockTokenLoader(
-                        cli.getOptionValue(ICliUtils.OPTION_URL, ICliUtils.DEFAULT_URL))
+                        cli.getOptionValue(ICliUtils.OPTION_URL, ICliUtils.DEFAULT_URL),
+                        cli.getOptionValue(ICliUtils.OPTION_AUTHZ_TOKEN))
                     .with(idAndSecret[0], idAndSecret[1], tokenCount)
                     .withCsvFile(cli.getOptionValue(ICliUtils.OPTION_CSV), cli.hasOption(ICliUtils.OPTION_APPEND))
                     .withTokenAlias(cli.getOptionValue(ICliUtils.OPTION_ALIAS))

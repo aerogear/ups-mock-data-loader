@@ -4,13 +4,20 @@ import com.google.gson.*;
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.logging.HttpLoggingInterceptor;
 import org.jboss.aerogear.test.retrofit.UnifiedPushService;
 import org.jboss.aerogear.unifiedpush.api.*;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import javax.net.ssl.*;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Used to return an already authenticated {@link UnifiedPushService} object.
@@ -18,20 +25,22 @@ import java.util.List;
 public class AerogearAdminServiceProvider {
 
     private static final Gson gson;
+
     static {
         gson = new GsonBuilder()
                 .registerTypeAdapter(VariantType.class, (JsonDeserializer<VariantType>) (jsonElement, type, jsonDeserializationContext) -> VariantType.valueOf(jsonElement.getAsString().toUpperCase()))
                 .registerTypeAdapter(PushApplication.class, (JsonDeserializer<PushApplication>) (jsonElement, type, jsonDeserializationContext) -> {
 
                     JsonObject jsonObject = jsonElement.getAsJsonObject();
+                    Logger.getAnonymousLogger().log(Level.SEVERE, jsonObject.toString());
 
                     PushApplication pushApplication = new PushApplication();
 
-                    pushApplication.setName( getString("name", jsonElement) );
-                    pushApplication.setDescription( getString("description", jsonElement) );
-                    pushApplication.setDeveloper( getString("developer", jsonElement) );
-                    pushApplication.setMasterSecret( getString("masterSecret", jsonElement));
-                    pushApplication.setPushApplicationID( getString("pushApplicationID", jsonElement) );
+                    pushApplication.setName(getString("name", jsonElement));
+                    pushApplication.setDescription(getString("description", jsonElement));
+                    pushApplication.setDeveloper(getString("developer", jsonElement));
+                    pushApplication.setMasterSecret(getString("masterSecret", jsonElement));
+                    pushApplication.setPushApplicationID(getString("pushApplicationID", jsonElement));
 
 
                     List<Variant> variantList = new ArrayList<>();
@@ -43,14 +52,14 @@ public class AerogearAdminServiceProvider {
                             Variant variant = null;
                             if (typeString.equals("ios")) {
                                 variant = new iOSVariant();
-                            } else if(typeString.equals("android")) {
+                            } else if (typeString.equals("android")) {
                                 variant = new AndroidVariant();
                             }
-                            variantList.add( variant );
+                            variantList.add(variant);
                         }
                     }
 
-                    pushApplication.setVariants( variantList );
+                    pushApplication.setVariants(variantList);
                     return pushApplication;
                 })
                 .create();
@@ -65,7 +74,8 @@ public class AerogearAdminServiceProvider {
 
     /**
      * Builds a new provider
-     * @param url URL to the aerogear UPS server
+     *
+     * @param url   URL to the aerogear UPS server
      * @param token the Authorization Header token to attach to requests
      */
     public AerogearAdminServiceProvider(final String url, final String token) {
@@ -84,6 +94,7 @@ public class AerogearAdminServiceProvider {
 
     /**
      * Sets if the answer should be cached or not
+     *
      * @param cacheAnswer true or false
      */
     public void setCacheAnswer(boolean cacheAnswer) {
@@ -102,24 +113,61 @@ public class AerogearAdminServiceProvider {
             return cachedInstance;
         }
 
-        OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
-        okHttpClientBuilder
-                .addInterceptor(chain -> {
-                    Request request = chain.request();
-                    Request.Builder newRequest = request.newBuilder().header("Authorization", token);
-                    return chain.proceed(newRequest.build());
-                });
+        final TrustManager[] trustAllCerts = new TrustManager[]{
+                new X509TrustManager() {
+                    @Override
+                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                    }
+
+                    @Override
+                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                    }
+
+                    @Override
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return new java.security.cert.X509Certificate[]{};
+                    }
+                }
+        };
+
+        // Install the all-trusting trust manager
+        final SSLContext sslContext;
+        try {
+            sslContext = SSLContext.getInstance("SSL");
+
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+
+            // Create an ssl socket factory with our all-trusting manager
+            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+            // set your desired log level
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(url)
-                .client(okHttpClientBuilder.build())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
+            OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
+            okHttpClientBuilder.sslSocketFactory(sslSocketFactory, (X509TrustManager)trustAllCerts[0]).hostnameVerifier((hostname, session) -> true);
+
+            okHttpClientBuilder
+                    .addInterceptor(chain -> {
+                        Request request = chain.request();
+                        Request.Builder newRequest = request.newBuilder().header("Authorization", "Bearer " + token);
+                        return chain.proceed(newRequest.build());
+                    })
+                    .addInterceptor(logging);
 
 
-        cachedInstance = retrofit.create(UnifiedPushService.class);
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(url)
+                    .client(okHttpClientBuilder.build())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
+                    .build();
 
+
+            cachedInstance = retrofit.create(UnifiedPushService.class);
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            e.printStackTrace();
+        }
         return cachedInstance;
     }
 
@@ -128,13 +176,19 @@ public class AerogearAdminServiceProvider {
     }
 
     public UnifiedPushService getAdminService(String variantID, String variantSecret) {
+
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        // set your desired log level
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
         okHttpClientBuilder
                 .addInterceptor(chain -> {
                     Request request = chain.request();
                     Request.Builder newRequest = request.newBuilder().header("Authorization", Credentials.basic(variantID, variantSecret));
                     return chain.proceed(newRequest.build());
-                });
+                })
+                .addInterceptor(logging);
 
 
         Retrofit retrofit = new Retrofit.Builder()

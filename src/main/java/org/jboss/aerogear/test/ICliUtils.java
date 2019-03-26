@@ -5,10 +5,9 @@ import org.apache.commons.cli.CommandLine;
 public interface ICliUtils {
     String OPTION_APPS = "apps";
     String OPTION_TOKENS = "tokens";
+    String OPTION_AUTHZ_TOKEN = "authz";
     String OPTION_VARIANTS = "variants";
-    String OPTION_USERNAME = "username";
-    String OPTION_PASSWORD = "password";
-    String OPTION_CLIENTID = "clientid";
+
     String OPTION_URL = "url";
     String OPTION_CSV = "csv";
     String OPTION_APPEND = "append";
