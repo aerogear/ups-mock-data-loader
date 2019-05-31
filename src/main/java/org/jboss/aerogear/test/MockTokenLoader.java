@@ -6,6 +6,8 @@ import org.jboss.aerogear.unifiedpush.api.Variant;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Loader for Mock tokens
@@ -88,11 +90,12 @@ public class MockTokenLoader extends Observable implements Observer, Runnable {
                 installation.setDeviceToken(generateAndroidToken());
                 installation.setAlias(DEVICE_ALIAS);
 
-                installation = provider.getAdminService().registerDevice(installation, variantID, variantSecret);
+                installation = provider.getAdminService(variantID, variantSecret).registerDevice(installation).execute().body();
 
                 notifyObservers(installation);
                 csvFile.addLine(variantID, installation.getAlias(), installation.getId());
             } catch (Exception e) {
+                Logger.getAnonymousLogger().log(Level.SEVERE, e.getMessage(), e);
                 notifyObservers(e);
             }
         }

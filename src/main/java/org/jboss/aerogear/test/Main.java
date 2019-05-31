@@ -6,10 +6,6 @@ public class Main implements ICliUtils {
 
     private static void validateCommandLine(final CommandLine cl) throws Exception {
 
-        if (cl.hasOption(OPTION_APPS) && !(cl.hasOption(OPTION_USERNAME) && cl.hasOption(OPTION_PASSWORD))) {
-            throw new Exception (String.format("Option <%s> requires both <%s> and <%s>", OPTION_APPS, OPTION_USERNAME, OPTION_PASSWORD));
-        }
-
         switch(cl.getOptionValues(OPTION_TOKENS).length) {
             case 1:
                 if (cl.hasOption(OPTION_VARIANTS) && cl.hasOption(OPTION_APPS)) {
@@ -43,9 +39,7 @@ public class Main implements ICliUtils {
         options.addOption(Option.builder("a").longOpt(OPTION_APPS).hasArg(true).argName("total").type(Number.class).desc("Number of apps to be generated").required(false).build());
         options.addOption(Option.builder("v").longOpt(OPTION_VARIANTS).hasArg(true).argName("total").type(Number.class).desc("Number of variants to be generated").required(false).build());
         options.addOption(Option.builder("t").longOpt(OPTION_TOKENS).hasArg(true).numberOfArgs(2).argName("total [variantid:secret]").optionalArg(true).type(Number.class).desc("Number of tokens to be generated").required(true).build());
-        options.addOption(Option.builder("u").longOpt(OPTION_USERNAME).hasArg(true).argName("username").desc("Username to be used to authenticate to the UPS").required(false).build());
-        options.addOption(Option.builder("p").longOpt(OPTION_PASSWORD).hasArg(true).argName("password").desc("Password to be used to authenticate to the UPS").required(false).build());
-        options.addOption(Option.builder("c").longOpt(OPTION_CLIENTID).hasArg(true).argName("id").desc("Client id used to create the apps. Defaults to <" + DEFAULT_CLIENT_ID + ">").required(false).build());
+        options.addOption(Option.builder("T").longOpt(OPTION_AUTHZ_TOKEN).hasArg(true).argName("authz").desc("Openshift token used to authenticate with UPS (oc whoami -t)").required(true).build());
         options.addOption(Option.builder("U").longOpt(OPTION_URL).hasArg(true).argName("UPS URL").desc("URL to the UPS server. Defaults to <" + DEFAULT_URL + ">").required(false).build());
         options.addOption(Option.builder("C").longOpt(OPTION_CSV).hasArg(true).argName("CSV FILE").desc("Generates a CSV file containing: variantid, token alias and tokenid").required(false).build());
         options.addOption(Option.builder("A").longOpt(OPTION_ALIAS).hasArg(true).argName("alias").desc("Use this option if you want a single alias for all the tokens").required(false).build());
